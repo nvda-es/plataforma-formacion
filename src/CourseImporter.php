@@ -27,9 +27,58 @@ use RuntimeException;
  */
 final class CourseImporter
 {
-    private const COURSE = '/^#\s+Curso\s*:\s*(.+?)\s*#*\s*$/iu';
-    private const MODULE = '/^##\s+M[oó]dulo\s*:\s*(.+?)\s*#*\s*$/iu';
-    private const ITEM = '/^###\s+(Unidad|Ejercicio)\s*:\s*(.+?)\s*#*\s*$/iu';
+    // La secuencia de cierre opcional (" ##") solo cuenta si va precedida de espacio: "C#" no se recorta
+    private const COURSE = '/^#\s+Curso\s*:\s*(.+?)(?:\s+#+)?\s*$/iu';
+    private const MODULE = '/^##\s+M[oó]dulo\s*:\s*(.+?)(?:\s+#+)?\s*$/iu';
+    private const ITEM = '/^###\s+(Unidad|Ejercicio)\s*:\s*(.+?)(?:\s+#+)?\s*$/iu';
+
+    /**
+     * Prepara un texto Markdown para incluirlo en un archivo de curso: las líneas que el
+     * importador tomaría por estructura (fuera de bloques de código) reciben un espacio
+     * inicial. CommonMark admite hasta 3 espacios antes de un encabezado, así que el
+     * contenido se sigue mostrando igual, pero ya no se confunde con un módulo o unidad.
+     */
+    public static function protectStructure(string $markdown): string
+    {
+        $fence = null;
+        $lines = explode("\n", str_replace(["\r\n", "\r"], "\n", $markdown));
+        foreach ($lines as &$line) {
+            if (self::fenceStep($fence, $line)) {
+                continue;
+            }
+            if (self::isStructural($line)) {
+                $line = ' ' . $line;
+            }
+        }
+        unset($line);
+        return implode("\n", $lines);
+    }
+
+    private static function isStructural(string $line): bool
+    {
+        return preg_match(self::COURSE, $line) === 1
+            || preg_match(self::MODULE, $line) === 1
+            || preg_match(self::ITEM, $line) === 1;
+    }
+
+    /**
+     * Sigue los bloques de código delimitados (``` o ~~~).
+     * Devuelve true si la línea abre, cierra o está dentro de un bloque.
+     */
+    private static function fenceStep(?string &$fence, string $line): bool
+    {
+        if ($fence !== null) {
+            if (preg_match('/^\s{0,3}' . preg_quote($fence[0], '/') . '{' . strlen($fence) . ',}\s*$/', $line)) {
+                $fence = null;
+            }
+            return true;
+        }
+        if (preg_match('/^\s{0,3}(`{3,}|~{3,})/', $line, $m)) {
+            $fence = $m[1];
+            return true;
+        }
+        return false;
+    }
 
     /**
      * @return array{title:string, summary:string, modules:list<array{title:string, description:string, items:list<array{type:string, title:string, content:string}>}>}
@@ -46,15 +95,7 @@ final class CourseImporter
         foreach ($lines as $index => $line) {
             $lineNumber = $index + 1;
 
-            if ($fence !== null) {
-                if (preg_match('/^\s{0,3}' . preg_quote($fence[0], '/') . '{' . strlen($fence) . ',}\s*$/', $line)) {
-                    $fence = null;
-                }
-                self::append($sections, $current, $line, $lineNumber);
-                continue;
-            }
-            if (preg_match('/^\s{0,3}(`{3,}|~{3,})/', $line, $m)) {
-                $fence = $m[1];
+            if (self::fenceStep($fence, $line)) {
                 self::append($sections, $current, $line, $lineNumber);
                 continue;
             }

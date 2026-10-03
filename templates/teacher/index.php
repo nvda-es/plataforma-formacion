@@ -1,5 +1,5 @@
 <?php
-/** @var array $submissions @var string $status @var array $filters */
+/** @var array $submissions @var string $status @var array $filters @var bool $isAdmin @var bool $onlyMine */
 ?>
 <h1>Corrección de ejercicios</h1>
 
@@ -12,6 +12,15 @@
             <?php endforeach; ?>
         </select>
     </div>
+    <?php if (!empty($isAdmin)): ?>
+        <div class="field">
+            <label for="cursos">Cursos</label>
+            <select id="cursos" name="cursos">
+                <option value="todos"<?= selected(!$onlyMine) ?>>Todos los cursos</option>
+                <option value="mios"<?= selected($onlyMine) ?>>Solo los cursos que tengo asignados</option>
+            </select>
+        </div>
+    <?php endif; ?>
     <button type="submit" class="button button-secondary">Filtrar</button>
 </form>
 

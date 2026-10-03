@@ -12,9 +12,12 @@ final class DashboardController
 {
     public function index(): void
     {
-        Auth::requireRole('admin');
+        $admin = Auth::requireRole('admin');
+        $assigned = (int) DB::value('SELECT COUNT(*) FROM courses WHERE teacher_id = ?', [(int) $admin['id']]);
 
         view('admin/dashboard', [
+            'assigned' => $assigned,
+            'assignedPending' => $assigned > 0 ? Submission::countPending((int) $admin['id']) : 0,
             'title' => 'Administración',
             'stats' => [
                 'students' => User::countByRole('student'),

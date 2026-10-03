@@ -11,6 +11,7 @@ use App\Models\Enrollment;
 use App\Models\User;
 use App\Password;
 use App\Progress;
+use App\RememberMe;
 use App\Tokens;
 use App\Validator;
 
@@ -105,6 +106,10 @@ final class UserController
         User::update((int) $user['id'], $data['name'], $data['email'], $data['role'], $data['is_active'], $verifiedAt);
         if ($password !== '') {
             User::updatePassword((int) $user['id'], Password::hash($password));
+        }
+        if ($password !== '' || !$data['is_active']) {
+            // Cierra las sesiones recordadas en todos sus navegadores
+            RememberMe::forgetUser((int) $user['id']);
         }
         flash('success', 'Los cambios de «' . $data['name'] . '» se han guardado.');
         redirect('/admin/usuarios/' . $user['id'] . '/editar');

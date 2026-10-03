@@ -35,7 +35,13 @@ $moduleCount = count($outline);
     <li><a class="button" href="<?= e(url('/admin/cursos/' . $course['id'] . '/modulos/nuevo')) ?>">Añadir un módulo</a></li>
     <li><a class="button button-secondary" href="<?= e(url('/admin/cursos/' . $course['id'] . '/editar')) ?>">Editar datos del curso</a></li>
     <li><a class="button button-secondary" href="<?= e(url('/cursos/' . $course['slug'])) ?>">Ver como alumno</a></li>
+    <li><a class="button button-secondary" href="<?= e(url('/admin/cursos/' . $course['id'] . '/exportar')) ?>" download>Exportar el curso completo (Markdown)</a></li>
 </ul>
+<p class="hint">
+    El curso completo se exporta en el formato de importación, así que puedes volver a importarlo.
+    Un módulo exportado se puede pegar en un archivo de curso, y una unidad o ejercicio exportado
+    se puede volver a subir desde su formulario de edición.
+</p>
 
 <?php if ($outline === []): ?>
     <p>El curso no tiene módulos. Empieza añadiendo uno.</p>
@@ -50,6 +56,7 @@ $moduleCount = count($outline);
             <?= $moveForm(url('/admin/modulos/' . $module['id'] . '/mover'), 'up', 'Subir<span class="visually-hidden"> el módulo ' . $mLabel . '</span>', $mIndex === 0) ?>
             <?= $moveForm(url('/admin/modulos/' . $module['id'] . '/mover'), 'down', 'Bajar<span class="visually-hidden"> el módulo ' . $mLabel . '</span>', $mIndex === $moduleCount - 1) ?>
             <a class="button button-small button-secondary" href="<?= e(url('/admin/modulos/' . $module['id'] . '/editar')) ?>">Editar<span class="visually-hidden"> el módulo <?= $mLabel ?></span></a>
+            <a class="button button-small button-secondary" href="<?= e(url('/admin/modulos/' . $module['id'] . '/exportar')) ?>" download>Exportar<span class="visually-hidden"> el módulo <?= $mLabel ?> en Markdown</span></a>
             <a class="button button-small" href="<?= e(url('/admin/modulos/' . $module['id'] . '/contenidos/nuevo', ['tipo' => 'unit'])) ?>">Añadir unidad<span class="visually-hidden"> al módulo <?= $mLabel ?></span></a>
             <a class="button button-small" href="<?= e(url('/admin/modulos/' . $module['id'] . '/contenidos/nuevo', ['tipo' => 'exercise'])) ?>">Añadir ejercicio<span class="visually-hidden"> al módulo <?= $mLabel ?></span></a>
             <form method="post" action="<?= e(url('/admin/modulos/' . $module['id'] . '/eliminar')) ?>" class="inline-form"
@@ -78,6 +85,7 @@ $moduleCount = count($outline);
                             <?= $moveForm(url('/admin/contenidos/' . $item['id'] . '/mover'), 'down', 'Bajar<span class="visually-hidden"> ' . $iLabel . '</span>', $iIndex === $itemCount - 1) ?>
                             <a class="button button-small button-secondary" href="<?= e(url('/admin/contenidos/' . $item['id'] . '/editar')) ?>">Editar<span class="visually-hidden"> <?= $iLabel ?></span></a>
                             <a class="button button-small button-secondary" href="<?= e(url('/cursos/' . $course['slug'] . '/contenido/' . $item['id'])) ?>">Vista previa<span class="visually-hidden"> de <?= $iLabel ?></span></a>
+                            <a class="button button-small button-secondary" href="<?= e(url('/admin/contenidos/' . $item['id'] . '/exportar')) ?>" download>Exportar<span class="visually-hidden"> <?= $iLabel ?> en Markdown</span></a>
                             <form method="post" action="<?= e(url('/admin/contenidos/' . $item['id'] . '/eliminar')) ?>" class="inline-form"
                                   data-confirm="¿Eliminar «<?= $iLabel ?>»?<?= $item['type'] === 'exercise' ? ' También se borrarán las respuestas de los alumnos.' : '' ?>">
                                 <?= csrf_field() ?>

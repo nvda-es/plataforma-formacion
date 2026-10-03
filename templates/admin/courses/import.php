@@ -59,7 +59,7 @@ MD;
         <select id="teacher_id" name="teacher_id"<?= field_attrs($errors, 'teacher_id') ?>>
             <option value="">Sin asignar</option>
             <?php foreach ($teachers as $t): ?>
-                <option value="<?= (int) $t['id'] ?>"<?= selected($oldTeacher === (string) $t['id']) ?>><?= e($t['name']) ?> (<?= e($t['email']) ?>)</option>
+                <option value="<?= (int) $t['id'] ?>"<?= selected($oldTeacher === (string) $t['id']) ?>><?= e($t['name']) ?> (<?= e($t['email']) ?>)<?= $t['role'] === 'admin' ? ' · administrador' : '' ?></option>
             <?php endforeach; ?>
         </select>
     </div>

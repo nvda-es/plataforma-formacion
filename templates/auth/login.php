@@ -25,6 +25,15 @@
                    autocomplete="current-password">
         </div>
 
+        <div class="checkbox">
+            <input type="checkbox" id="remember" name="remember" value="1" aria-describedby="remember-hint"<?= checked(!empty($old['remember'])) ?>>
+            <label for="remember">Mantener la sesión iniciada en este navegador</label>
+            <p class="hint" id="remember-hint">
+                No tendrás que volver a identificarte durante <?= App\RememberMe::days() ?> días.
+                No lo marques en un ordenador compartido o público.
+            </p>
+        </div>
+
         <?= partial('recaptcha') ?>
 
         <button type="submit" class="button">Iniciar sesión</button>

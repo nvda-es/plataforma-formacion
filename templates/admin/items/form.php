@@ -84,3 +84,10 @@ $oldModule = old($old, 'module_id', (string) $module['id']);
     <button type="submit" class="button"><?= $isEdit ? 'Guardar cambios' : 'Añadir' ?></button>
     <a href="<?= e(url('/admin/cursos/' . $module['course_id'])) ?>">Cancelar</a>
 </form>
+
+<?php if ($isEdit): ?>
+    <p>
+        <a href="<?= e(url('/admin/contenidos/' . $item['id'] . '/exportar')) ?>" download>Descargar el contenido guardado en Markdown</a>
+        (útil para editarlo en otro programa y volver a subirlo).
+    </p>
+<?php endif; ?>

@@ -36,7 +36,8 @@ final class Session
             $hadUser = isset($_SESSION['user_id']);
             $_SESSION = [];
             session_regenerate_id(true);
-            if ($hadUser) {
+            // Con una sesión recordada, el usuario vuelve a entrar sin intervención: no se le avisa
+            if ($hadUser && !RememberMe::hasCookie()) {
                 flash('info', 'Tu sesión se ha cerrado por inactividad. Vuelve a iniciar sesión.');
             }
         }

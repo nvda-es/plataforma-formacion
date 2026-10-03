@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Auth;
+use App\CourseExporter;
+use App\Support\Str;
 use App\Models\Course;
 use App\Models\Item;
 use App\Models\Module;
@@ -87,6 +89,15 @@ final class ItemController
         Item::delete((int) $item['id']);
         flash('success', '«' . $item['title'] . '» se ha eliminado.');
         redirect('/admin/cursos/' . $item['course_id'] . '#modulo-' . $item['module_id']);
+    }
+
+    /** Descarga el contenido Markdown de la unidad o el enunciado del ejercicio. */
+    public function export(string $id): void
+    {
+        Auth::requireRole('admin');
+        $item = Item::find((int) $id) ?? abort(404, 'El contenido no existe.');
+        $prefix = $item['type'] === 'exercise' ? '-ejercicio-' : '-unidad-';
+        download($item['course_slug'] . $prefix . Str::slug($item['title']) . '.md', CourseExporter::item($item));
     }
 
     public function move(string $id): void

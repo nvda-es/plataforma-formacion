@@ -12,8 +12,10 @@ $subject = ($approved ? 'Ejercicio aprobado: ' : 'Ejercicio calificado: ') . $it
 <p>Hola, <?= e($name) ?>:</p>
 <p>Tu profesor ha calificado el ejercicio «<?= e($itemTitle) ?>» del curso «<?= e($courseTitle) ?>».</p>
 <p>Resultado: <strong><?= $approved ? 'Aprobado' : 'Suspendido' ?></strong></p>
-<p>Comentario del profesor:</p>
-<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:4px solid #0b57d0;background:#f4f7fd;white-space:pre-wrap;"><?= e($feedback) ?></blockquote>
+<?php if ($feedback !== ''): ?>
+    <p>Comentario del profesor:</p>
+    <blockquote style="margin:0 0 16px;padding:12px 16px;border-left:4px solid #0b57d0;background:#f4f7fd;white-space:pre-wrap;"><?= e($feedback) ?></blockquote>
+<?php endif; ?>
 <?php if (!$approved): ?>
     <p>Revisa el comentario y envía una nueva respuesta cuando estés listo.</p>
 <?php endif; ?>

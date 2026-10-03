@@ -25,6 +25,9 @@ set_exception_handler(static function (Throwable $e): void {
     App\Http\ErrorHandler::handle($e);
 });
 
+// Resuelve el usuario (y una posible sesión recordada) antes de generar ninguna salida
+App\Auth::user();
+
 /** @var App\Router $router */
 $router = require BASE_PATH . '/src/routes.php';
 $router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');

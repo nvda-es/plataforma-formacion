@@ -57,9 +57,12 @@ $oldStatus = old($old, 'status');
 
             <div class="field">
                 <label for="feedback">Comentario de feedback para el alumno</label>
-                <p class="hint" id="feedback-hint">El alumno lo recibirá por correo electrónico y lo verá junto al ejercicio. Máximo 5.000 caracteres.</p>
+                <p class="hint" id="feedback-hint">
+                    Obligatorio si el ejercicio está suspendido; opcional si está aprobado.
+                    El alumno lo recibirá por correo electrónico y lo verá junto al ejercicio. Máximo 5.000 caracteres.
+                </p>
                 <?= field_error($errors, 'feedback') ?>
-                <textarea id="feedback" name="feedback" rows="8" required maxlength="5000"
+                <textarea id="feedback" name="feedback" rows="8" maxlength="5000"
                     <?= field_attrs($errors, 'feedback', 'feedback-hint') ?>><?= e(old($old, 'feedback')) ?></textarea>
             </div>
 

@@ -13,7 +13,12 @@ final class Auth
     private static ?array $user = null;
     private static bool $resolved = false;
 
-    /** Usuario autenticado. Se recarga en cada petición para reflejar bajas o cambios de rol. */
+    /**
+     * Usuario autenticado. Se recarga en cada petición para reflejar bajas o cambios de rol.
+     * Si no hay sesión pero sí una cookie de "mantener la sesión iniciada" válida, se abre
+     * una sesión nueva. public/index.php lo llama al principio de cada petición para que el
+     * token CSRF no cambie a mitad del renderizado.
+     */
     public static function user(): ?array
     {
         if (!self::$resolved) {
@@ -27,11 +32,17 @@ final class Auth
                     unset($_SESSION['user_id']);
                 }
             }
+            if (self::$user === null && session_status() === PHP_SESSION_ACTIVE) {
+                $remembered = RememberMe::consume();
+                if ($remembered !== null) {
+                    self::login($remembered);
+                }
+            }
         }
         return self::$user;
     }
 
-    public static function login(array $user): void
+    public static function login(array $user, bool $remember = false): void
     {
         // Evita la fijación de sesión
         session_regenerate_id(true);
@@ -39,10 +50,14 @@ final class Auth
         Csrf::regenerate();
         self::$user = $user;
         self::$resolved = true;
+        if ($remember) {
+            RememberMe::issue((int) $user['id']);
+        }
     }
 
     public static function logout(): void
     {
+        RememberMe::forget();
         $_SESSION = [];
         session_regenerate_id(true);
         Csrf::regenerate();

@@ -65,6 +65,9 @@ $router->get('/admin/cursos/{id}', [AdminCourseController::class, 'show']);
 $router->get('/admin/cursos/{id}/editar', [AdminCourseController::class, 'edit']);
 $router->post('/admin/cursos/{id}', [AdminCourseController::class, 'update']);
 $router->post('/admin/cursos/{id}/eliminar', [AdminCourseController::class, 'destroy']);
+$router->get('/admin/cursos/{id}/exportar', [AdminCourseController::class, 'export']);
+$router->get('/admin/modulos/{id}/exportar', [AdminModuleController::class, 'export']);
+$router->get('/admin/contenidos/{id}/exportar', [AdminItemController::class, 'export']);
 
 $router->get('/admin/cursos/{id}/modulos/nuevo', [AdminModuleController::class, 'create']);
 $router->post('/admin/cursos/{id}/modulos', [AdminModuleController::class, 'store']);

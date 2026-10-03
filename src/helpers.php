@@ -63,6 +63,17 @@ function redirect(string $path, array $query = []): never
     exit;
 }
 
+/** Envía un archivo de texto para descargar. El nombre se reduce a caracteres seguros. */
+function download(string $filename, string $content, string $contentType = 'text/markdown'): never
+{
+    $safe = (string) preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename);
+    header('Content-Type: ' . $contentType . '; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $safe . '"');
+    header('Content-Length: ' . strlen($content));
+    echo $content;
+    exit;
+}
+
 function abort(int $status, string $message = ''): never
 {
     throw new HttpException($status, $message);

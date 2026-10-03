@@ -17,6 +17,12 @@ final class Module
         );
     }
 
+    /** Contenidos completos del módulo, en orden. */
+    public static function items(int $moduleId): array
+    {
+        return DB::all('SELECT * FROM items WHERE module_id = ? ORDER BY position, id', [$moduleId]);
+    }
+
     public static function create(int $courseId, string $title, string $description): int
     {
         $now = DB::now();

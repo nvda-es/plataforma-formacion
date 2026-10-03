@@ -29,12 +29,17 @@ final class TeacherController
         if (!isset(self::FILTERS[$status])) {
             $status = 'pending';
         }
+        // Los administradores ven todas las entregas, pero pueden limitarse a los cursos que tienen asignados
+        $isAdmin = $user['role'] === 'admin';
+        $onlyMine = !$isAdmin || query_param('cursos') === 'mios';
 
         view('teacher/index', [
             'title' => 'Corrección de ejercicios',
-            'submissions' => Submission::listForGrader($user, $status),
+            'submissions' => Submission::listForGrader($user, $status, $onlyMine),
             'status' => $status,
             'filters' => self::FILTERS,
+            'isAdmin' => $isAdmin,
+            'onlyMine' => $onlyMine,
         ]);
     }
 
@@ -61,8 +66,9 @@ final class TeacherController
         if (!in_array($status, ['approved', 'failed'], true)) {
             $errors['status'] = 'Indica si el ejercicio está aprobado o suspendido.';
         }
-        if ($feedback === '') {
-            $errors['feedback'] = 'Escribe un comentario de feedback para el alumno.';
+        // El comentario es obligatorio al suspender (el alumno debe saber qué corregir) y opcional al aprobar
+        if ($feedback === '' && $status === 'failed') {
+            $errors['feedback'] = 'Escribe un comentario para explicar al alumno qué debe mejorar.';
         } elseif (mb_strlen($feedback) > 5000) {
             $errors['feedback'] = 'El comentario no puede superar los 5.000 caracteres.';
         }
@@ -71,7 +77,7 @@ final class TeacherController
             return;
         }
 
-        if (!Submission::grade((int) $submission['id'], $status, $feedback, (int) $user['id'])) {
+        if (!Submission::grade((int) $submission['id'], $status, $feedback !== '' ? $feedback : null, (int) $user['id'])) {
             flash('info', 'Otra persona ha calificado esta entrega mientras la revisabas.');
             redirect($path);
         }

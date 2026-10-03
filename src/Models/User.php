@@ -67,6 +67,24 @@ final class User
         );
     }
 
+    /** Roles que pueden figurar como profesor de un curso. */
+    public const COURSE_TEACHER_ROLES = ['teacher', 'admin'];
+
+    /** Profesores y administradores activos, que pueden asignarse como profesor de un curso. */
+    public static function assignableTeachers(): array
+    {
+        return DB::all(
+            "SELECT id, name, email, role FROM users
+             WHERE role IN ('teacher', 'admin') AND is_active = 1
+             ORDER BY role = 'admin', name"
+        );
+    }
+
+    public static function canTeach(?array $user): bool
+    {
+        return $user !== null && in_array($user['role'], self::COURSE_TEACHER_ROLES, true);
+    }
+
     /** Listado paginado con filtro por rol y búsqueda por nombre o correo. */
     public static function paginate(string $role, string $search, int $page, int $perPage = 25): array
     {

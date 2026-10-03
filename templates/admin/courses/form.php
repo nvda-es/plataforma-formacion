@@ -44,12 +44,15 @@ $oldTeacher = old($old, 'teacher_id');
 
     <div class="field">
         <label for="teacher_id">Profesor/a</label>
-        <p class="hint" id="teacher-hint">Recibirá los avisos de ejercicios pendientes de corrección. Sin profesor asignado, los avisos van a los administradores.</p>
+        <p class="hint" id="teacher-hint">
+            Puede ser un profesor o un administrador. Recibirá los avisos de ejercicios pendientes de corrección;
+            sin nadie asignado, los avisos van a todos los administradores.
+        </p>
         <?= field_error($errors, 'teacher_id') ?>
         <select id="teacher_id" name="teacher_id"<?= field_attrs($errors, 'teacher_id', 'teacher-hint') ?>>
             <option value="">Sin asignar</option>
             <?php foreach ($teachers as $t): ?>
-                <option value="<?= (int) $t['id'] ?>"<?= selected($oldTeacher === (string) $t['id']) ?>><?= e($t['name']) ?> (<?= e($t['email']) ?>)</option>
+                <option value="<?= (int) $t['id'] ?>"<?= selected($oldTeacher === (string) $t['id']) ?>><?= e($t['name']) ?> (<?= e($t['email']) ?>)<?= $t['role'] === 'admin' ? ' · administrador' : '' ?></option>
             <?php endforeach; ?>
         </select>
     </div>

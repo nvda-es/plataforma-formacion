@@ -37,8 +37,8 @@ if ($file === null || !is_file($file)) {
 $teacherId = null;
 if ($teacherEmail !== null) {
     $teacher = User::findByEmail($teacherEmail);
-    if ($teacher === null || $teacher['role'] !== 'teacher') {
-        fwrite(STDERR, "No existe ningún profesor con el correo {$teacherEmail}.\n");
+    if (!User::canTeach($teacher)) {
+        fwrite(STDERR, "No existe ningún profesor ni administrador con el correo {$teacherEmail}.\n");
         exit(1);
     }
     $teacherId = (int) $teacher['id'];

@@ -58,10 +58,10 @@ final class Submission
     }
 
     /**
-     * Entregas visibles para quien corrige: el administrador ve todas;
-     * el profesor, solo las de sus cursos.
+     * Entregas visibles para quien corrige: el administrador ve todas (o solo las de
+     * los cursos que tiene asignados si $onlyMine); el profesor, solo las de sus cursos.
      */
-    public static function listForGrader(array $user, string $status): array
+    public static function listForGrader(array $user, string $status, bool $onlyMine = false): array
     {
         $where = [];
         $params = [];
@@ -69,7 +69,7 @@ final class Submission
             $where[] = 's.status = ?';
             $params[] = $status;
         }
-        if ($user['role'] !== 'admin') {
+        if ($user['role'] !== 'admin' || $onlyMine) {
             $where[] = 'c.teacher_id = ?';
             $params[] = (int) $user['id'];
         }
@@ -92,7 +92,7 @@ final class Submission
     }
 
     /** Califica una entrega pendiente. Devuelve false si ya estaba calificada. */
-    public static function grade(int $id, string $status, string $feedback, int $graderId): bool
+    public static function grade(int $id, string $status, ?string $feedback, int $graderId): bool
     {
         return DB::exec(
             "UPDATE submissions SET status = ?, feedback = ?, graded_at = ?, graded_by = ?

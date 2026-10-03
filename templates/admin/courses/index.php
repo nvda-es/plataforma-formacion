@@ -44,6 +44,7 @@
                     <td>
                         <ul class="actions">
                             <li><a href="<?= e(url('/admin/cursos/' . $c['id'])) ?>">Contenidos<span class="visually-hidden"> de <?= e($c['title']) ?></span></a></li>
+                            <li><a href="<?= e(url('/admin/cursos/' . $c['id'] . '/exportar')) ?>" download>Exportar<span class="visually-hidden"> <?= e($c['title']) ?> en Markdown</span></a></li>
                             <li><a href="<?= e(url('/admin/cursos/' . $c['id'] . '/editar')) ?>">Editar<span class="visually-hidden"> <?= e($c['title']) ?></span></a></li>
                             <li><a href="<?= e(url('/cursos/' . $c['slug'])) ?>">Ver<span class="visually-hidden"> <?= e($c['title']) ?> como alumno</span></a></li>
                         </ul>

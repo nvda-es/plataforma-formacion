@@ -50,6 +50,9 @@ return [
         'session_name' => 'formacion_sid',
         // Segundos de inactividad tras los que se cierra la sesión
         'session_idle_timeout' => 1800,
+        // Días que dura "Mantener la sesión iniciada" (caducidad absoluta, no se alarga con el uso)
+        'remember_days' => 30,
+        'remember_cookie' => 'formacion_remember',
         // Toma la IP del cliente de la cabecera X-Forwarded-For (primera IP válida).
         // Actívalo solo si un proxy de confianza fija esa cabecera y los clientes no pueden
         // llegar a la aplicación sin pasar por él; si no, podrían falsear su IP.

@@ -9,6 +9,7 @@ se organizan en módulos con unidades de texto y ejercicios de respuesta abierta
 **Alumnos**
 - Registro con verificación obligatoria del correo electrónico (la cuenta no se activa hasta abrir el enlace).
 - Inicio de sesión, recuperación de contraseña y reenvío del enlace de activación.
+- Casilla «Mantener la sesión iniciada en este navegador» (30 días por defecto, `security.remember_days`).
 - reCAPTCHA v3 en los formularios de registro, inicio de sesión, recuperación y reenvío.
 - Catálogo de cursos publicados y matrícula libre en los que elija.
 - Lectura de unidades (Markdown convertido a HTML) y respuesta a ejercicios en texto libre.
@@ -18,7 +19,8 @@ se organizan en módulos con unidades de texto y ejercicios de respuesta abierta
 
 **Profesores**
 - Listado de entregas de sus cursos (pendientes, aprobadas, suspendidas).
-- Calificación de cada respuesta como aprobada o suspendida, con comentario de feedback.
+- Calificación de cada respuesta como aprobada o suspendida, con comentario de feedback
+  (obligatorio al suspender, opcional al aprobar).
 
 **Administración**
 - Alta manual de alumnos, profesores y administradores (con contraseña o con enlace de invitación).
@@ -27,6 +29,9 @@ se organizan en módulos con unidades de texto y ejercicios de respuesta abierta
 - Gestión de cursos, módulos, unidades y ejercicios (crear, editar, reordenar, eliminar).
 - Contenidos en Markdown escritos en el formulario o cargados desde archivos `.md`.
 - Importación de un curso completo desde un único archivo Markdown.
+- Exportación a Markdown del curso completo, de cada módulo y de cada unidad o ejercicio.
+- Un administrador puede asignarse como profesor de un curso: recibe los avisos de sus ejercicios y
+  puede filtrar la corrección por «Solo los cursos que tengo asignados».
 
 **Correos automáticos**
 
@@ -135,6 +140,24 @@ Solo los encabezados con esos prefijos delimitan la estructura; cualquier otro e
 (`## Resumen`, `#### Ejemplo`…) forma parte del contenido. Los bloques de código se respetan.
 Tienes un ejemplo completo en [`content/ejemplo-accesibilidad-web.md`](content/ejemplo-accesibilidad-web.md).
 
+### Exportación
+
+Desde la página de contenidos de un curso (*Administración → Cursos → Contenidos*):
+
+- **Curso completo**: archivo con el formato anterior, que se puede volver a importar.
+- **Módulo**: sección `## Módulo:` con sus unidades y ejercicios, lista para pegarla en un archivo de curso.
+- **Unidad o ejercicio**: su contenido Markdown sin cambios, que se puede volver a subir desde el
+  formulario de edición de ese contenido.
+
+Si el contenido incluye una línea que el importador tomaría por estructura (por ejemplo
+`### Unidad: …` fuera de un bloque de código), la exportación le añade un espacio inicial. Así no se
+confunde con un módulo o una unidad al reimportar, y se sigue mostrando igual.
+
+## Actualizar una instalación existente
+
+Tras actualizar el código, ejecuta `php bin/install.php`: solo crea las tablas que falten
+(por ejemplo, `remember_tokens`) y no modifica los datos.
+
 ## Estructura del proyecto
 
 ```
@@ -158,6 +181,10 @@ storage/logs/   Registros de errores y de correo
 - **CSRF**: token por sesión validado en todas las peticiones POST; cookies `SameSite=Lax`.
 - **Sesiones**: cookies `HttpOnly` y `Secure` (con HTTPS), modo estricto, regeneración del identificador al
   iniciar y cerrar sesión, y cierre por inactividad (30 minutos por defecto).
+- **Sesión recordada**: cookie `HttpOnly`/`SameSite=Lax` con `selector:validador`; en la base de datos solo
+  se guarda el hash del validador. El validador rota en cada uso; el anterior se acepta solo durante 60
+  segundos, para peticiones simultáneas. La caducidad es absoluta. Cerrar sesión borra el token, y
+  restablecer o cambiar la contraseña, o desactivar la cuenta, invalida todos los del usuario.
 - **Contraseñas**: Argon2id (o bcrypt si no está disponible), longitud mínima de 10 caracteres y rehash automático.
 - **Tokens** de verificación y recuperación aleatorios (256 bits), de un solo uso, con caducidad y guardados como hash.
 - **Fuerza bruta**: límite de intentos de inicio de sesión por correo y por IP, límites en registro y envíos

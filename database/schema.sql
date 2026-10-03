@@ -32,6 +32,24 @@ CREATE TABLE IF NOT EXISTS user_tokens (
     CONSTRAINT fk_user_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Sesiones recordadas ("Mantener la sesión iniciada"). La cookie contiene selector:validador;
+-- aquí solo se guarda el hash SHA-256 del validador. El validador rota en cada uso y el
+-- anterior se acepta durante unos segundos para no expulsar a peticiones simultáneas.
+CREATE TABLE IF NOT EXISTS remember_tokens (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    selector CHAR(24) NOT NULL,
+    validator_hash CHAR(64) NOT NULL,
+    previous_hash CHAR(64) NULL,
+    rotated_at DATETIME NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL,
+    UNIQUE KEY uq_remember_tokens_selector (selector),
+    KEY idx_remember_tokens_user (user_id),
+    KEY idx_remember_tokens_expires (expires_at),
+    CONSTRAINT fk_remember_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Registro de intentos para limitar la frecuencia (inicio de sesión, registro, envíos de correo)
 CREATE TABLE IF NOT EXISTS rate_limits (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

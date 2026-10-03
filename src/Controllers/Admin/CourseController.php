@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Auth;
+use App\CourseExporter;
 use App\CourseImporter;
 use App\Models\Course;
 use App\Models\User;
@@ -37,7 +38,7 @@ final class CourseController
         view('admin/courses/form', [
             'title' => 'Nuevo curso',
             'course' => null,
-            'teachers' => User::activeByRole('teacher'),
+            'teachers' => User::assignableTeachers(),
         ]);
     }
 
@@ -49,7 +50,7 @@ final class CourseController
             view('admin/courses/form', [
                 'title' => 'Nuevo curso',
                 'course' => null,
-                'teachers' => User::activeByRole('teacher'),
+                'teachers' => User::assignableTeachers(),
                 'old' => $data,
                 'errors' => $errors,
             ], 422);
@@ -67,7 +68,7 @@ final class CourseController
         view('admin/courses/form', [
             'title' => 'Editar curso: ' . $course['title'],
             'course' => $course,
-            'teachers' => User::activeByRole('teacher'),
+            'teachers' => User::assignableTeachers(),
             'old' => [
                 'title' => $course['title'],
                 'slug' => $course['slug'],
@@ -87,7 +88,7 @@ final class CourseController
             view('admin/courses/form', [
                 'title' => 'Editar curso: ' . $course['title'],
                 'course' => $course,
-                'teachers' => User::activeByRole('teacher'),
+                'teachers' => User::assignableTeachers(),
                 'old' => $data,
                 'errors' => $errors,
             ], 422);
@@ -107,12 +108,20 @@ final class CourseController
         redirect('/admin/cursos');
     }
 
+    /** Descarga el curso completo en el formato de importación. */
+    public function export(string $id): void
+    {
+        Auth::requireRole('admin');
+        $course = Course::find((int) $id) ?? abort(404, 'El curso no existe.');
+        download($course['slug'] . '.md', CourseExporter::course($course));
+    }
+
     public function importForm(): void
     {
         Auth::requireRole('admin');
         view('admin/courses/import', [
             'title' => 'Importar un curso desde Markdown',
-            'teachers' => User::activeByRole('teacher'),
+            'teachers' => User::assignableTeachers(),
         ]);
     }
 
@@ -141,7 +150,7 @@ final class CourseController
         if ($errors !== [] || $parsed === null) {
             view('admin/courses/import', [
                 'title' => 'Importar un curso desde Markdown',
-                'teachers' => User::activeByRole('teacher'),
+                'teachers' => User::assignableTeachers(),
                 'old' => $old,
                 'errors' => $errors,
             ], 422);
@@ -200,8 +209,8 @@ final class CourseController
             return null;
         }
         $teacher = User::find((int) $value);
-        if ($teacher === null || $teacher['role'] !== 'teacher') {
-            $errors['teacher_id'] ??= 'Selecciona un profesor válido.';
+        if (!User::canTeach($teacher)) {
+            $errors['teacher_id'] ??= 'Selecciona un profesor o administrador válido.';
             return null;
         }
         return (int) $teacher['id'];

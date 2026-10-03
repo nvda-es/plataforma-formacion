@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Password;
 use App\RateLimiter;
 use App\Recaptcha;
+use App\RememberMe;
 use App\Tokens;
 use App\Validator;
 
@@ -120,7 +121,7 @@ final class AuthController
             view('auth/login', [
                 'title' => 'Iniciar sesión',
                 'recaptcha' => true,
-                'old' => ['email' => $email],
+                'old' => ['email' => $email, 'remember' => checkbox('remember')],
                 'errors' => ['_form' => $message],
                 'unverified' => $unverified,
             ], $status);
@@ -168,7 +169,7 @@ final class AuthController
             User::updatePassword((int) $user['id'], Password::hash($password));
         }
         RateLimiter::clear('login_email', $email);
-        Auth::login($user);
+        Auth::login($user, checkbox('remember'));
         flash('success', 'Hola, ' . $user['name'] . '. Has iniciado sesión.');
 
         $intended = Auth::pullIntended();
@@ -274,6 +275,8 @@ final class AuthController
         User::updatePassword($userId, Password::hash($password));
         // Quien usa el enlace demuestra que controla el correo
         User::markVerified($userId);
+        // Una contraseña nueva cierra las sesiones recordadas en otros navegadores
+        RememberMe::forgetUser($userId);
         RateLimiter::clear('login_email', $user['email']);
 
         flash('success', 'Tu contraseña se ha guardado. Ya puedes iniciar sesión con ella.');

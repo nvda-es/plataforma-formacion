@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Auth;
+use App\CourseExporter;
+use App\Support\Str;
 use App\Models\Course;
 use App\Models\Module;
 use App\Validator;
@@ -76,6 +78,17 @@ final class ModuleController
         Module::delete((int) $module['id']);
         flash('success', 'El módulo «' . $module['title'] . '» y sus contenidos se han eliminado.');
         redirect('/admin/cursos/' . $module['course_id']);
+    }
+
+    /** Descarga el módulo como sección "## Módulo:" lista para un archivo de curso. */
+    public function export(string $id): void
+    {
+        Auth::requireRole('admin');
+        $module = Module::find((int) $id) ?? abort(404, 'El módulo no existe.');
+        download(
+            $module['course_slug'] . '-modulo-' . Str::slug($module['title']) . '.md',
+            CourseExporter::module($module)
+        );
     }
 
     public function move(string $id): void

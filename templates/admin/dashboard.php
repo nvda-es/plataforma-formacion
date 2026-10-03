@@ -1,8 +1,16 @@
 <?php
-/** @var array $stats */
+/** @var array $stats @var int $assigned @var int $assignedPending */
 ?>
 <?= partial('admin_nav') ?>
 <h1>Administración</h1>
+
+<?php if ($assigned > 0): ?>
+    <p class="alert alert-info">
+        Tienes <?= $assigned ?> <?= $assigned === 1 ? 'curso asignado' : 'cursos asignados' ?> como profesor/a,
+        con <?= $assignedPending ?> <?= $assignedPending === 1 ? 'ejercicio pendiente' : 'ejercicios pendientes' ?> de corrección.
+        <a href="<?= e(url('/profesor', ['cursos' => 'mios'])) ?>">Ver mis entregas</a>
+    </p>
+<?php endif; ?>
 
 <ul class="stats">
     <li><span class="stat-value"><?= (int) $stats['students'] ?></span> <span class="stat-label">alumnos</span></li>
